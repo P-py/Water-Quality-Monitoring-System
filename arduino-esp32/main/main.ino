@@ -11,7 +11,9 @@
 #include <Blynk.h>
 
 #define pinoDHT 23
+#define pinoLDR 34
 
+int leituraLDR;
 float temperatura;
 float umidade;
 
@@ -30,17 +32,28 @@ void initLCD(){
 void collectAndSendData(){
   temperatura = dht.readTemperature();
   umidade = dht.readHumidity();
+  leituraLDR = analogRead(pinoLDR);
+  Serial.println(leituraLDR);
   if (isnan(umidade)||isnan(temperatura)){
-    lcd.setCursor(1,1);
+    lcd.setCursor(0,1);
     lcd.print("FALHA DHT");
   }
   else {
     Blynk.virtualWrite(V0, temperatura);
     Blynk.virtualWrite(V1, umidade);
-    lcd.setCursor(1,1);
+    Blynk.virtualWrite(V2, leituraLDR);
+    lcd.setCursor(0,1);
     lcd.print("Temp: ");
     lcd.print(temperatura);
-    lcd.print("*C");
+    lcd.print((char)223);
+    lcd.print("C ");
+    lcd.setCursor(0,0);
+    lcd.print("U: ");
+    lcd.print(umidade);
+    lcd.print("% ");
+    lcd.print("L:");
+    lcd.print(leituraLDR);
+    lcd.print(" ");
   }
 }
 
