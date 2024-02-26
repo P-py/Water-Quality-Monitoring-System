@@ -12,6 +12,8 @@
 
 #define pinoDHT 23
 #define pinoLDR 34
+#define pinoLED 13
+#define pinoLED2 14
 
 int leituraLDR;
 float temperatura;
@@ -22,10 +24,9 @@ DHT dht(pinoDHT, DHT11);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 BlynkTimer timer;
 
+
 void initLCD(){
   lcd.init();
-  lcd.backlight();
-  lcd.setCursor(1, 1);
   lcd.clear();
 }
 
@@ -33,7 +34,6 @@ void collectAndSendData(){
   temperatura = dht.readTemperature();
   umidade = dht.readHumidity();
   leituraLDR = analogRead(pinoLDR);
-  Serial.println(leituraLDR);
   if (isnan(umidade)||isnan(temperatura)){
     lcd.setCursor(0,1);
     lcd.print("FALHA DHT");
@@ -58,6 +58,8 @@ void collectAndSendData(){
 }
 
 void setup() {
+  pinMode(pinoLED, OUTPUT);
+  pinMode(pinoLED2, OUTPUT);
   initLCD();
   dht.begin();
   Serial.begin(115200);
@@ -68,4 +70,23 @@ void setup() {
 void loop() {
   Blynk.run();
   timer.run();
+}
+
+BLYNK_CONNECTED(){
+  Blynk.syncVirtual(V3);
+}
+
+BLYNK_WRITE(V3){
+  if (param.asInt()==1){
+    Serial.println(param.asInt());
+    digitalWrite(pinoLED, HIGH);
+    digitalWrite(pinoLED2, HIGH);
+    lcd.backlight();
+  }
+  else {
+    Serial.println(param.asInt());
+    digitalWrite(pinoLED, LOW);
+    digitalWrite(pinoLED2, LOW);
+    lcd.noBacklight();
+  }
 }
