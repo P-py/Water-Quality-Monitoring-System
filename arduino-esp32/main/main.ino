@@ -1,8 +1,8 @@
 //Config for blynk API to work
 #define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID "TMPL2xjj94ysA"
-#define BLYNK_TEMPLATE_NAME "WaterMonitor"
-#define BLYNK_AUTH_TOKEN "ueLwCMFhmr9bOrtIrHoNr3pKGPflc0jS"
+#define BLYNK_TEMPLATE_ID "TEMPLATE_ID_HERE"
+#define BLYNK_TEMPLATE_NAME "TEMPLATE_NAME_HERE"
+#define BLYNK_AUTH_TOKEN "AUTH_TOKEN_HERE"
 
 //Libs
 #include <LiquidCrystal_I2C.h>
