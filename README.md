@@ -15,6 +15,7 @@
 - [Installation](#installation)
 - [Recommended configurations](#recommended-configurations)
 - [Custom configurations](#custom-configurations)
+- [Release history](#release-history)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -44,6 +45,11 @@ The initial motivation was given in one of [Alexandre Guassi's](https://www.link
 
 [(Back to top)](#table-of-contents)
 
+# Release history
+* 0.0.1
+    * First prototype test
+    * Testing the ESP32
+    * Project viability test
 
 # Contributing
 
