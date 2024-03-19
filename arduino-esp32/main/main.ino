@@ -4,23 +4,32 @@
 #define BLYNK_TEMPLATE_NAME "TEMPLATE_NAME_HERE"
 #define BLYNK_AUTH_TOKEN "AUTH_TOKEN_HERE"
 
+//Config vars for the TDS Sensor
+#define VREF 5.0
+#define SCOUNT 30
+int analogBuffer[SCOUNT];
+int analogBufferTemp[SCOUNT];
+String tdsValue;
+
 //Libs
 #include <LiquidCrystal_I2C.h>
 #include "DHT.h"
 #include <BlynkSimpleEsp32.h>
 #include <Blynk.h>
 
+#define pinSensor 15
 #define pinoDHT 23
 #define pinoLDR 34
 #define pinoLED 13
 #define pinoLED2 14
+#define RXp2 16
+#define TXp2 17
 
 int leituraLDR;
 float temperatura;
 float umidade;
 
 //Initialize objects
-DHT dht(pinoDHT, DHT11);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 BlynkTimer timer;
 
@@ -28,48 +37,41 @@ BlynkTimer timer;
 void initLCD(){
   lcd.init();
   lcd.clear();
+  lcd.backlight();
 }
 
 void collectAndSendData(){
-  temperatura = dht.readTemperature();
-  umidade = dht.readHumidity();
-  leituraLDR = analogRead(pinoLDR);
-  if (isnan(umidade)||isnan(temperatura)){
+  tdsValue = Serial2.readStringUntil('-');
+  if (tdsValue == ""){
     lcd.setCursor(0,1);
-    lcd.print("FALHA DHT");
+    lcd.print("FALHA ARDUINO");
   }
   else {
-    Blynk.virtualWrite(V0, temperatura);
-    Blynk.virtualWrite(V1, umidade);
-    Blynk.virtualWrite(V2, leituraLDR);
+    Serial.println(tdsValue);
+    lcd.clear();
     lcd.setCursor(0,1);
-    lcd.print("Temp: ");
-    lcd.print(temperatura);
-    lcd.print((char)223);
-    lcd.print("C ");
-    lcd.setCursor(0,0);
-    lcd.print("U: ");
-    lcd.print(umidade);
-    lcd.print("% ");
-    lcd.print("L:");
-    lcd.print(leituraLDR);
-    lcd.print(" ");
+    lcd.print("TDS: ");
+    lcd.print(tdsValue);
+    lcd.print("ppm");
   }
 }
 
 void setup() {
   pinMode(pinoLED, OUTPUT);
   pinMode(pinoLED2, OUTPUT);
+  pinMode(pinSensor, INPUT);
   initLCD();
-  dht.begin();
   Serial.begin(115200);
-  Blynk.begin(BLYNK_AUTH_TOKEN, "Pdr", "blme5011");
-  timer.setInterval(2000L, collectAndSendData);
+  Serial2.begin(9600, SERIAL_8N1, RXp2, TXp2);
+  //Blynk.begin(BLYNK_AUTH_TOKEN, "Pdr", "blme5011");
+  //timer.setInterval(2000L, collectAndSendData);
 }
 
 void loop() {
-  Blynk.run();
-  timer.run();
+  //Blynk.run();
+  //timer.run();
+  collectAndSendData();
+  delay(2000);
 }
 
 BLYNK_CONNECTED(){
