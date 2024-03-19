@@ -5,7 +5,7 @@
 
 > A system for detecting and monitoring contamination in water reservoirs. Developed using an `ESP32` microcontroller, measuring sensors and `C++`.
 
- ![image]()
+ ![image](./README-files/system.gif)
 
 
 # Table of contents
