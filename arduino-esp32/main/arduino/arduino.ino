@@ -1,8 +1,17 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define pinOneWire 12
+
 #define TdsSensorPin A1
 #define VREF 5.0           // analog reference voltage(Volt) of the ADC
 #define SCOUNT 30          // sum of sample point
 
 #define pinESP32 8
+
+OneWire oneWire(pinOneWire);
+DallasTemperature sensor(&oneWire);
+DeviceAddress endereco_temp;
 
 int analogBuffer[SCOUNT];  // store the analog value in the array, read from ADC
 int analogBufferTemp[SCOUNT];
@@ -11,11 +20,44 @@ float averageVoltage = 0, tdsValue = 0, temperature = 25;
 
 void setup() {
   Serial.begin(9600);
+  sensor.begin();
   pinMode(TdsSensorPin, INPUT);
   pinMode(pinESP32, OUTPUT);
 }
 
+int getMedianNum(int bArray[], int iFilterLen) {
+  int bTab[iFilterLen];
+  for (byte i = 0; i < iFilterLen; i++)
+    bTab[i] = bArray[i];
+  int i, j, bTemp;
+  for (j = 0; j < iFilterLen - 1; j++) {
+    for (i = 0; i < iFilterLen - j - 1; i++) {
+      if (bTab[i] > bTab[i + 1]) {
+        bTemp = bTab[i];
+        bTab[i] = bTab[i + 1];
+        bTab[i + 1] = bTemp;
+      }
+    }
+  }
+  if ((iFilterLen & 1) > 0)
+    bTemp = bTab[(iFilterLen - 1) / 2];
+  else
+    bTemp = (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
+  return bTemp;
+}
+
+void temperatureSensor(){
+  sensor.requestTemperatures();
+  if (!sensor.getAddress(endereco_temp, 0)){
+    Serial.println("SENSOR DE TEMPERATURA NAO CONECTADO");
+  }
+  else {
+    Serial.println(sensor.getTempC(endereco_temp), 1);
+  }
+}
+
 void loop() {
+  temperatureSensor();
   static unsigned long analogSampleTimepoint = millis();
   if (millis() - analogSampleTimepoint > 40U)  //every 40 milliseconds,read the analog value from the ADC
   {
@@ -41,24 +83,4 @@ void loop() {
     Serial.print("-");
     delay(2000);
   }
-}
-int getMedianNum(int bArray[], int iFilterLen) {
-  int bTab[iFilterLen];
-  for (byte i = 0; i < iFilterLen; i++)
-    bTab[i] = bArray[i];
-  int i, j, bTemp;
-  for (j = 0; j < iFilterLen - 1; j++) {
-    for (i = 0; i < iFilterLen - j - 1; i++) {
-      if (bTab[i] > bTab[i + 1]) {
-        bTemp = bTab[i];
-        bTab[i] = bTab[i + 1];
-        bTab[i + 1] = bTemp;
-      }
-    }
-  }
-  if ((iFilterLen & 1) > 0)
-    bTemp = bTab[(iFilterLen - 1) / 2];
-  else
-    bTemp = (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
-  return bTemp;
 }
