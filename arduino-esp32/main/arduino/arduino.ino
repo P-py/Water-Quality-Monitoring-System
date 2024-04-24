@@ -4,8 +4,8 @@
 #define pinOneWire 12
 
 #define TdsSensorPin A1
-#define VREF 5.0           // analog reference voltage(Volt) of the ADC
-#define SCOUNT 30          // sum of sample point
+#define VREF 5.0   // analog reference voltage(Volt) of the ADC
+#define SCOUNT 30  // sum of sample point
 
 #define pinESP32 8
 
@@ -46,13 +46,12 @@ int getMedianNum(int bArray[], int iFilterLen) {
   return bTemp;
 }
 
-void temperatureSensor(){
+void temperatureSensor() {
   sensor.requestTemperatures();
-  if (!sensor.getAddress(endereco_temp, 0)){
+  if (!sensor.getAddress(endereco_temp, 0)) {
     Serial.println("SENSOR DE TEMPERATURA NAO CONECTADO");
-  }
-  else {
-    Serial.println(sensor.getTempC(endereco_temp), 1);
+  } else {
+    Serial.print(sensor.getTempC(endereco_temp), 1);
   }
 }
 
@@ -79,8 +78,9 @@ void loop() {
     //Serial.print("EC:");
     //Serial.print(compensationVolatge,2);
     //Serial.print("\t");
-    Serial.print(tdsValue, 0);
     Serial.print("-");
+    Serial.print(tdsValue, 0);
+    Serial.println("/");
     delay(2000);
   }
 }

@@ -29,6 +29,8 @@ int leituraLDR;
 float temperatura;
 float umidade;
 
+int posicao_separador1;
+
 //Initialize objects
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 BlynkTimer timer;
@@ -41,18 +43,38 @@ void initLCD(){
 }
 
 void collectAndSendData(){
-  tdsValue = Serial2.readStringUntil('-');
+  tdsValue = Serial2.readStringUntil('\n');
+  tdsValue.trim();
   if (tdsValue == ""){
     lcd.setCursor(0,1);
     lcd.print("FALHA ARDUINO");
   }
   else {
-    Serial.println(tdsValue);
+    //Serial.println(tdsValue.toInt());
     lcd.clear();
-    lcd.setCursor(0,1);
+    lcd.setCursor(0, 0);
     lcd.print("TDS: ");
-    lcd.print(tdsValue);
+    for (int i=0; i<tdsValue.length(); i++){
+      if (tdsValue[i]=='-'){
+        posicao_separador1 = i+1;
+      }
+    }
+    for (int i=posicao_separador1; i<tdsValue.length()-1; i++){
+      lcd.print(tdsValue[i]);
+    }
     lcd.print("ppm");
+    lcd.setCursor(0,1);
+    lcd.print("Temp: ");
+    for (int i=0; i<tdsValue.length(); i++){
+      if (tdsValue[i]!='-'){
+        lcd.print(tdsValue[i]);
+      }
+      else {
+        break;
+      }
+    }
+    lcd.print((char)223);
+    lcd.print("C");
   }
 }
 
