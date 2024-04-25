@@ -55,7 +55,11 @@ The initial motivation was given in one of [Alexandre Guassi's](https://www.link
     * DS18B20 + TDS Meter V1.0
     * Fixed bugs and erros in arduino-esp32 communication
     * Fixed data-decoding on esp32's side
-
+* 0.0.3 
+    * Add PH sensor operation
+    * Change error message when connecting temperature sensor
+    * Change Arduino <-> esp32 data sending and interpretation
+    * Add display of pH data on LCD
 
 # Contributing
 
