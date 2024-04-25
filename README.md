@@ -50,6 +50,12 @@ The initial motivation was given in one of [Alexandre Guassi's](https://www.link
     * First prototype test
     * Testing the ESP32
     * Project viability test
+* 0.0.2
+    * First working version with Temp+TDS
+    * DS18B20 + TDS Meter V1.0
+    * Fixed bugs and erros in arduino-esp32 communication
+    * Fixed data-decoding on esp32's side
+
 
 # Contributing
 
