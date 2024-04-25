@@ -9,6 +9,8 @@
 
 #define pinESP32 8
 
+#define pinPH A0
+
 OneWire oneWire(pinOneWire);
 DallasTemperature sensor(&oneWire);
 DeviceAddress endereco_temp;
@@ -17,6 +19,13 @@ int analogBuffer[SCOUNT];  // store the analog value in the array, read from ADC
 int analogBufferTemp[SCOUNT];
 int analogBufferIndex = 0, copyIndex = 0;
 float averageVoltage = 0, tdsValue = 0, temperature = 25;
+
+float calibration = -1.00;
+int phSensorValue = 0;
+unsigned long int avgValue;
+float b;
+int buf[10], temp;
+
 
 void setup() {
   Serial.begin(9600);
@@ -49,14 +58,40 @@ int getMedianNum(int bArray[], int iFilterLen) {
 void temperatureSensor() {
   sensor.requestTemperatures();
   if (!sensor.getAddress(endereco_temp, 0)) {
-    Serial.println("SENSOR DE TEMPERATURA NAO CONECTADO");
+    Serial.print("NA");
   } else {
     Serial.print(sensor.getTempC(endereco_temp), 1);
   }
 }
 
+void phSensor(){
+  for (int i=0; i<10; i++){
+    buf[i] = analogRead(pinPH);
+    delay(30);
+  }
+  for (int i=0; i<9; i++){
+    for (int j=0; j<10; j++){
+      if (buf[i]>buf[j]){
+        temp = buf[i];
+        buf[i] = buf[j];
+        buf[j] = temp;
+      }
+    }
+  }
+  avgValue = 0;
+  for (int i=2; i<8; i++){
+    avgValue += buf[i];
+  }
+  float phValue = (float) avgValue*5.0/1024/6;
+  phValue = 3.5*phValue;
+  phValue = phValue + calibration;
+  Serial.print(",");
+  Serial.print(phValue,2);
+}
+
 void loop() {
   temperatureSensor();
+  phSensor();
   static unsigned long analogSampleTimepoint = millis();
   if (millis() - analogSampleTimepoint > 40U)  //every 40 milliseconds,read the analog value from the ADC
   {
@@ -78,9 +113,12 @@ void loop() {
     //Serial.print("EC:");
     //Serial.print(compensationVolatge,2);
     //Serial.print("\t");
-    Serial.print("-");
+    Serial.print(",");
     Serial.print(tdsValue, 0);
     Serial.println("/");
+    //leitura_A0 = analogRead(A0);
+    //tensao =  (leitura_A0*5.0) / 1024.0;
+    //Serial.println(tensao);
     delay(2000);
   }
 }

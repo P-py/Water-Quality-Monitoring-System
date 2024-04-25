@@ -29,7 +29,8 @@ int leituraLDR;
 float temperatura;
 float umidade;
 
-int posicao_separador1;
+//[Temp],[pH],[TDS]
+int posicao_separadorTDS, posicao_separadorPH;
 
 //Initialize objects
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -44,6 +45,7 @@ void initLCD(){
 
 void collectAndSendData(){
   tdsValue = Serial2.readStringUntil('\n');
+  int contador_separadores = 0;
   tdsValue.trim();
   if (tdsValue == ""){
     lcd.setCursor(0,1);
@@ -51,30 +53,34 @@ void collectAndSendData(){
   }
   else {
     //Serial.println(tdsValue.toInt());
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("TDS: ");
     for (int i=0; i<tdsValue.length(); i++){
-      if (tdsValue[i]=='-'){
-        posicao_separador1 = i+1;
+      if (contador_separadores == 0 && tdsValue[i]==','){
+        posicao_separadorTDS = i;
+        contador_separadores++;
+      }
+      else if (contador_separadores == 1 && tdsValue[i]==',') {
+        posicao_separadorPH = i;
+        contador_separadores++;
       }
     }
-    for (int i=posicao_separador1; i<tdsValue.length()-1; i++){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("TDS:");
+    for (int i=posicao_separadorPH+1; i<tdsValue.length()-1; i++){
       lcd.print(tdsValue[i]);
     }
     lcd.print("ppm");
     lcd.setCursor(0,1);
-    lcd.print("Temp: ");
-    for (int i=0; i<tdsValue.length(); i++){
-      if (tdsValue[i]!='-'){
-        lcd.print(tdsValue[i]);
-      }
-      else {
-        break;
-      }
+    lcd.print("T:");
+    for (int i=0; i<posicao_separadorTDS; i++){
+      lcd.print(tdsValue[i]);
     }
     lcd.print((char)223);
-    lcd.print("C");
+    lcd.print("C ");
+    lcd.print("pH:");
+    for (int i=posicao_separadorTDS+1; i<posicao_separadorPH; i++){
+      lcd.print(tdsValue[i]);
+    }
   }
 }
 
