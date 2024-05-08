@@ -1,8 +1,8 @@
 //Config for blynk API to work
 #define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID "TEMPLATE_ID_HERE"
-#define BLYNK_TEMPLATE_NAME "TEMPLATE_NAME_HERE"
-#define BLYNK_AUTH_TOKEN "AUTH_TOKEN_HERE"
+#define BLYNK_TEMPLATE_ID "###"
+#define BLYNK_TEMPLATE_NAME "###"
+#define BLYNK_AUTH_TOKEN "###"
 
 //Config vars for the TDS Sensor
 #define VREF 5.0
@@ -81,6 +81,9 @@ void collectAndSendData(){
     for (int i=posicao_separadorTDS+1; i<posicao_separadorPH; i++){
       lcd.print(tdsValue[i]);
     }
+    Blynk.virtualWrite(V0, tdsValue.substring(posicao_separadorPH+1, tdsValue.length()-1).toInt());
+    Blynk.virtualWrite(V1, tdsValue.substring(posicao_separadorTDS+1, posicao_separadorPH).toDouble());
+    Blynk.virtualWrite(V2, tdsValue.substring(0, posicao_separadorTDS).toDouble());
   }
 }
 
@@ -91,32 +94,14 @@ void setup() {
   initLCD();
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, RXp2, TXp2);
-  //Blynk.begin(BLYNK_AUTH_TOKEN, "Pdr", "blme5011");
-  //timer.setInterval(2000L, collectAndSendData);
+  Blynk.begin(BLYNK_AUTH_TOKEN, "Pdr", "blme5011");
+  timer.setInterval(5000L, collectAndSendData);
 }
 
 void loop() {
-  //Blynk.run();
-  //timer.run();
+  Blynk.run();
+  timer.run();
   collectAndSendData();
-  delay(2000);
+  delay(5000);
 }
 
-BLYNK_CONNECTED(){
-  Blynk.syncVirtual(V3);
-}
-
-BLYNK_WRITE(V3){
-  if (param.asInt()==1){
-    Serial.println(param.asInt());
-    digitalWrite(pinoLED, HIGH);
-    digitalWrite(pinoLED2, HIGH);
-    lcd.backlight();
-  }
-  else {
-    Serial.println(param.asInt());
-    digitalWrite(pinoLED, LOW);
-    digitalWrite(pinoLED2, LOW);
-    lcd.noBacklight();
-  }
-}
