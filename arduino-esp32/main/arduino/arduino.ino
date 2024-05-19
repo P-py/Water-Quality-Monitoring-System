@@ -20,12 +20,18 @@ int analogBufferTemp[SCOUNT];
 int analogBufferIndex = 0, copyIndex = 0;
 float averageVoltage = 0, tdsValue = 0, temperature = 25;
 
-float calibration = -1.00;
+float calibration = 0;
 int phSensorValue = 0;
 unsigned long int avgValue;
 float b;
 int buf[10], temp;
 
+int samples = 10;
+float adc_resolution = 1024.0;
+
+float phFunc (float voltage){
+  return 7 + ((2.5-voltage) / 0.18);
+}
 
 void setup() {
   Serial.begin(9600);
@@ -65,28 +71,50 @@ void temperatureSensor() {
 }
 
 void phSensor(){
-  for (int i=0; i<10; i++){
-    buf[i] = analogRead(pinPH);
-    delay(30);
+  //Version 1
+  //float ph = map(analogRead(pinPH), 0.0, 900.0, 14.0, 0.0);
+  //if (ph<7){
+  //  ph-=1;
+  //}
+  //else if (ph>7){
+  //  ph+=1;
+  //}
+
+  int measurings = 0;
+  for (int i=0; i<samples; i++){
+    measurings += analogRead(pinPH);
+    delay(10);
   }
-  for (int i=0; i<9; i++){
-    for (int j=0; j<10; j++){
-      if (buf[i]>buf[j]){
-        temp = buf[i];
-        buf[i] = buf[j];
-        buf[j] = temp;
-      }
-    }
-  }
-  avgValue = 0;
-  for (int i=2; i<8; i++){
-    avgValue += buf[i];
-  }
-  float phValue = (float) avgValue*5.0/1024/6;
-  phValue = 3.5*phValue;
-  phValue = phValue + calibration;
+  float voltage = (5 / adc_resolution) * (measurings/samples);
+  float ph = phFunc(voltage);
+  
   Serial.print(",");
-  Serial.print(phValue,2);
+  Serial.print(ph);
+
+
+  //Serial.print(ph);
+  //for (int i=0; i<10; i++){
+  //  buf[i] = analogRead(pinPH);
+  //  delay(30);
+  //}
+  //for (int i=0; i<9; i++){
+  //  for (int j=i+1; j<10; j++){
+  //    if (buf[i]>buf[j]){
+  //      temp = buf[i];
+  //      buf[i] = buf[j];
+  //      buf[j] = temp;
+  //    }
+  //  }
+  //}
+  //avgValue = 0;
+  //for (int i=2; i<8; i++){
+  //  avgValue += buf[i];
+  //}
+  //float phValue = (float) ((avgValue*5.0/1024/6)*3.5)+calibration;
+  //float phValue = analogRead(pinPH) * 5.0 / 1024.0;
+  //phValue *= 1000;
+  //Serial.print(",");
+  //Serial.print(phValue);
 }
 
 void loop() {
